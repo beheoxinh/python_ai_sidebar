@@ -68,3 +68,4 @@ $RECYCLE.BIN/
 *.lnk
 
 secure_cache
+__pycache__
