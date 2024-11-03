@@ -1,3 +1,4 @@
+from PyQt6.QtCore import QUrl
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QSizePolicy
 from .navigation_bar import NavigationBar
 from .web_view import CustomWebView
