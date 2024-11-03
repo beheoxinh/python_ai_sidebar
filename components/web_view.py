@@ -23,7 +23,6 @@ class SecureBrowserInterceptor(QWebEngineUrlRequestInterceptor):
 
 class PopupWindow(QMainWindow):
     popupClosed = pyqtSignal()
-    authFinished = pyqtSignal(str)
 
     def __init__(self, profile, parent=None):
         super().__init__(parent)
@@ -56,15 +55,20 @@ class PopupWindow(QMainWindow):
         # Set window geometry
         self.setGeometry(center_x, center_y, window_width, window_height)
 
+        # Connect authFinished signal to close the popup
+        self.page.authFinished.connect(self.close)
+
     def closeEvent(self, event):
         print("PopupWindow: Closing")
         if self.parent:
             self.parent.popupClosed.emit()
+        self.popupClosed.emit()
         event.accept()
 
 class CustomWebEnginePage(QWebEnginePage):
     popupCreated = pyqtSignal(object)
     authCallback = pyqtSignal(str)
+    authFinished = pyqtSignal(str)
 
     def __init__(self, profile, parent=None):
         super().__init__(profile, parent)
@@ -87,37 +91,16 @@ class CustomWebEnginePage(QWebEnginePage):
         print(f"JS [{level}] {message} (line {line})")
 
     def acceptNavigationRequest(self, url, _type, isMainFrame):
-        try:
-            url_str = url.toString()
-            parsed_url = urlparse(url_str)
+        url_str = url.toString()
+        parsed_url = urlparse(url_str)
 
-            # Handle Google Auth redirect
-            if "storagerelay://" in url_str:
-                print("Detected storage relay callback")
-                QTimer.singleShot(2000, lambda: self.reloadWithAuth())
-                return False
-
-            # Allow auth domains
-            if any(domain in parsed_url.netloc for domain in self.auth_domains):
-                print(f"Auth URL detected: {url_str}")
-                if not self.auth_in_progress:
-                    self.auth_in_progress = True
-                    self.current_url = self.url().toString()
+        if "claude.ai" in parsed_url.netloc:
+            if self.auth_in_progress:
+                print("Auth completed, returning to app")
+                self.auth_in_progress = False
+                self.authFinished.emit(url_str)  # Emit authFinished signal
                 return True
-
-            # Handle return to Claude
-            if "claude.ai" in parsed_url.netloc:
-                if self.auth_in_progress:
-                    print("Auth completed, returning to app")
-                    self.auth_in_progress = False
-                    return True
-
-            print(f"Normal navigation to: {url_str}")
-            return True
-
-        except Exception as e:
-            print(f"Error in acceptNavigationRequest: {e}")
-            return True
+        return True
 
     def reloadWithAuth(self):
         """Reload page after auth completion"""

@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 
 class NavigationBar(QFrame):
-    homeClicked = pyqtSignal()
+    # homeClicked = pyqtSignal()
     refreshClicked = pyqtSignal()
     backClicked = pyqtSignal()
     forwardClicked = pyqtSignal()
@@ -28,7 +28,7 @@ class NavigationBar(QFrame):
 
         # Tạo các nút với callbacks
         nav_buttons = [
-            ("⌂", "Home", self.homeClicked),
+            # ("⌂", "Home", self.homeClicked),
             ("↺", "Refresh", self.refreshClicked),
             ("←", "Back", self.backClicked),
             ("→", "Forward", self.forwardClicked)

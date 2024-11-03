@@ -1,4 +1,3 @@
-# File: sidebar.py
 import win32gui
 import win32con
 import win32api
@@ -9,7 +8,6 @@ from PyQt6.QtGui import QCursor, QShortcut, QKeySequence
 from components.title_bar import TitleBar
 from components.resize_handle import ResizeHandle
 from components.content_widget import ContentWidget
-
 
 class Sidebar(QMainWindow):
     def __init__(self):
@@ -22,6 +20,10 @@ class Sidebar(QMainWindow):
         self.popup_windows = []
         self.init_ui()
         self.setup_shortcut()
+
+    def setup_shortcut(self):
+        shortcut = QShortcut(QKeySequence("Ctrl+Shift+F"), self)
+        shortcut.activated.connect(self.toggle_sidebar)
 
     def init_ui(self):
         self.setWindowFlags(
@@ -49,7 +51,6 @@ class Sidebar(QMainWindow):
         self.content_widget = ContentWidget()
         main_layout.addWidget(self.content_widget)
 
-        # Kết nối signals từ webview
         self.content_widget.web_view.popupCreated.connect(self.handle_popup_created)
         self.content_widget.web_view.authCompleted.connect(self.handle_auth_completed)
 
@@ -76,60 +77,29 @@ class Sidebar(QMainWindow):
         self.hide()
 
     def handle_popup_created(self, popup):
-        """Handler cho popup mới được tạo"""
         print("Sidebar: Popup created")
         self.popup_windows.append(popup)
         self.has_active_popup = True
         self.mouse_timer.stop()
-
-        # Kết nối popup signals
         popup.popupClosed.connect(lambda: self.handle_popup_closed(popup))
 
     def handle_popup_closed(self, popup=None):
-        """Handler cho popup đóng"""
         print("Sidebar: Popup closed")
         if popup in self.popup_windows:
             self.popup_windows.remove(popup)
 
         if not self.popup_windows:
             self.has_active_popup = False
-            self.mouse_timer.start(50)
+            self.mouse_timer.start(50)  # Restart the mouse timer
 
     def handle_auth_completed(self, callback_url):
-        """Handle authentication completion"""
         print(f"Authentication completed: {callback_url}")
 
-        # Đóng tất cả popup và khôi phục trạng thái sidebar sau khi xác thực xong
         for popup in self.popup_windows[:]:
             popup.close()
         self.popup_windows.clear()
         self.has_active_popup = False
-        self.mouse_timer.start(50)  # Khởi động lại mouse timer
-
-    def setup_shortcut(self):
-        self.shortcut = QShortcut(QKeySequence("Ctrl+Shift+S"), self)
-        self.shortcut.activated.connect(self.toggle_sidebar)
-
-        self.global_timer = QTimer(self)
-        self.global_timer.timeout.connect(self.check_hotkey)
-        self.global_timer.start(100)
-
-        self.ctrl_pressed = False
-        self.shift_pressed = False
-        self.s_pressed = False
-
-    def check_hotkey(self):
-        ctrl_state = win32api.GetKeyState(win32con.VK_CONTROL)
-        shift_state = win32api.GetKeyState(win32con.VK_SHIFT)
-        s_state = win32api.GetKeyState(0x53)  # 0x53 là mã ASCII của phím S
-
-        if (ctrl_state < 0 and shift_state < 0 and s_state < 0 and
-                not (self.ctrl_pressed and self.shift_pressed and self.s_pressed)):
-            self.toggle_sidebar()
-
-        self.ctrl_pressed = ctrl_state < 0
-        self.shift_pressed = shift_state < 0
-        self.s_pressed = s_state < 0
+        self.mouse_timer.start(50)  # Restart the mouse timer
 
     def check_mouse(self):
         try:
@@ -154,7 +124,6 @@ class Sidebar(QMainWindow):
                 self.show()
                 self.is_visible = True
 
-            # Kiểm tra click chuột
             current_state = win32api.GetKeyState(0x01)
             if current_state != self.previous_state:
                 self.previous_state = current_state
@@ -183,6 +152,19 @@ class Sidebar(QMainWindow):
         except Exception as e:
             print(f"Error in delayed hide: {e}")
 
+    def mousePressEvent(self, event):
+        if event.button() in (Qt.MouseButton.LeftButton, Qt.MouseButton.RightButton):
+            if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
+                self.hide()
+                self.is_visible = False
+        super().mousePressEvent(event)
+
+    def contextMenuEvent(self, event):
+        if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
+            self.hide()
+            self.is_visible = False
+        super().contextMenuEvent(event)
+
     def toggle_sidebar(self):
         if self.is_visible:
             self.hide_sidebar()
@@ -204,7 +186,6 @@ class Sidebar(QMainWindow):
             self.is_visible = True
 
     def closeEvent(self, event):
-        """Handle application closure"""
         for popup in self.popup_windows[:]:
             popup.close()
         self.popup_windows.clear()
@@ -252,9 +233,3 @@ class Sidebar(QMainWindow):
     def moveEvent(self, event):
         if self.active_screen:
             self.update_position()
-
-    def mousePressEvent(self, event):
-        if self.content_widget.web_view.underMouse():
-            event.accept()
-        else:
-            super().mousePressEvent(event)

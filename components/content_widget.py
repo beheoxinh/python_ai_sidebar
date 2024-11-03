@@ -34,7 +34,7 @@ class ContentWidget(QWidget):
 
     def setup_connections(self):
         # Kết nối các signals từ navigation bar với web view
-        self.nav_bar.homeClicked.connect(lambda: self.web_view.setUrl(QUrl("https://claude.ai/")))
+        # self.nav_bar.homeClicked.connect(lambda: self.web_view.setUrl(QUrl("https://claude.ai/")))
         self.nav_bar.refreshClicked.connect(self.web_view.reload)
         self.nav_bar.backClicked.connect(self.web_view.back)
         self.nav_bar.forwardClicked.connect(self.web_view.forward)
