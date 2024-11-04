@@ -1,4 +1,6 @@
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import win32gui
 import win32con
 from PyQt6.QtGui import QAction, QIcon
@@ -44,7 +46,7 @@ def main():
     sidebar = Sidebar()
 
     # Create system tray icon
-    tray_icon = QSystemTrayIcon(QIcon("images/trayicon.svg"), parent=app)
+    tray_icon = QSystemTrayIcon(QIcon("images/tray.svg"), parent=app)
     tray_menu = QMenu()
 
     show_action = QAction("Show")
