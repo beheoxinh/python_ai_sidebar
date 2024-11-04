@@ -1,7 +1,8 @@
 import sys
 import win32gui
 import win32con
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from sidebar import Sidebar
 
 def bring_to_front(hwnd):
@@ -41,6 +42,22 @@ def main():
 
     # Normal startup
     sidebar = Sidebar()
+
+    # Create system tray icon
+    tray_icon = QSystemTrayIcon(QIcon("images/trayicon.svg"), parent=app)
+    tray_menu = QMenu()
+
+    show_action = QAction("Show")
+    show_action.triggered.connect(sidebar.show_sidebar)
+    tray_menu.addAction(show_action)
+
+    exit_action = QAction("Exit App")
+    exit_action.triggered.connect(app.quit)
+    tray_menu.addAction(exit_action)
+
+    tray_icon.setContextMenu(tray_menu)
+    tray_icon.show()
+
     sys.exit(app.exec())
 
 if __name__ == '__main__':
