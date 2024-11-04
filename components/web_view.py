@@ -12,6 +12,7 @@ import sys
 import time
 from urllib.parse import urlparse, parse_qs, urlencode
 
+
 class SecureBrowserInterceptor(QWebEngineUrlRequestInterceptor):
     def interceptRequest(self, info):
         # Add secure headers
@@ -20,6 +21,7 @@ class SecureBrowserInterceptor(QWebEngineUrlRequestInterceptor):
         info.setHttpHeader(b"Accept-Language", b"en-US,en;q=0.5")
         info.setHttpHeader(b"DNT", b"1")
         info.setHttpHeader(b"Upgrade-Insecure-Requests", b"1")
+
 
 class PopupWindow(QMainWindow):
     popupClosed = pyqtSignal()
@@ -34,8 +36,8 @@ class PopupWindow(QMainWindow):
         self.web_view.setPage(self.page)
         self.setCentralWidget(self.web_view)
 
+        self.setWindowTitle("Loading...")
         self.setMinimumSize(800, 600)
-        self.setWindowTitle("Authentication")
         self.setWindowFlags(
             Qt.WindowType.Window |
             Qt.WindowType.WindowStaysOnTopHint |
@@ -58,12 +60,16 @@ class PopupWindow(QMainWindow):
         # Connect authFinished signal to close the popup
         self.page.authFinished.connect(self.close)
 
+        # Connect titleChanged signal to update window title
+        self.page.titleChanged.connect(self.setWindowTitle)
+
     def closeEvent(self, event):
         print("PopupWindow: Closing")
         if self.parent:
             self.parent.popupClosed.emit()
         self.popupClosed.emit()
         event.accept()
+
 
 class CustomWebEnginePage(QWebEnginePage):
     popupCreated = pyqtSignal(object)
@@ -120,6 +126,7 @@ class CustomWebEnginePage(QWebEnginePage):
             print(f"Error creating popup window: {e}")
             return None
 
+
 class CustomWebView(QWebEngineView):
     popupCreated = pyqtSignal(object)
     popupClosed = pyqtSignal()
@@ -146,6 +153,45 @@ class CustomWebView(QWebEngineView):
 
         self.setMouseTracking(True)
         self.loaded = False
+
+        # Inject CSS to hide the scroll bar after page load
+        self.page().loadFinished.connect(self.hide_scrollbar)
+
+    def save_last_url(self, url):
+        try:
+            with open("lasturl", "w") as file:
+                file.write(url)
+            print(f"URL saved to lasturl: {url}")
+        except Exception as e:
+            print(f"Error saving URL to lasturl: {e}")
+
+    def load_last_url(self):
+        try:
+            if os.path.exists("lasturl"):
+                with open("lasturl", "r") as file:
+                    url = file.read().strip()
+                print(f"URL loaded from lasturl: {url}")
+                return url
+        except Exception as e:
+            print(f"Error loading URL from lasturl: {e}")
+        return "https://claude.ai/"
+
+    def hide_scrollbar(self):
+        self.page().runJavaScript("""
+            const style = document.createElement('style');
+            style.innerHTML = `
+                ::-webkit-scrollbar {
+                    display: none;
+                }
+                body {
+                    overflow: hidden;
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.addEventListener('wheel', function(event) {
+                window.scrollBy(0, event.deltaY);
+            });
+        """)
 
     def handle_auth_callback(self, callback_url):
         print(f"WebView: Auth callback received: {callback_url}")
@@ -202,8 +248,27 @@ class CustomWebView(QWebEngineView):
             cookie_name = cookie.name().data().decode()
             print(f"Cookie removed: {cookie_name}")
 
+        # Connect signals
         cookie_store.cookieAdded.connect(on_cookie_added)
         cookie_store.cookieRemoved.connect(on_cookie_removed)
+
+        # Ensure cookies are not added/removed repeatedly
+        self.cookie_set = set()
+
+        def handle_cookie_added(cookie):
+            cookie_name = cookie.name().data().decode()
+            if cookie_name not in self.cookie_set:
+                self.cookie_set.add(cookie_name)
+                on_cookie_added(cookie)
+
+        def handle_cookie_removed(cookie):
+            cookie_name = cookie.name().data().decode()
+            if cookie_name in self.cookie_set:
+                self.cookie_set.remove(cookie_name)
+                on_cookie_removed(cookie)
+
+        cookie_store.cookieAdded.connect(handle_cookie_added)
+        cookie_store.cookieRemoved.connect(handle_cookie_removed)
 
     def createWindow(self, window_type):
         return self.page().createWindow(window_type)
@@ -212,7 +277,8 @@ class CustomWebView(QWebEngineView):
         super().showEvent(event)
         if not self.loaded:
             print("Loading initial URL...")
-            self.setUrl(QUrl("https://claude.ai/"))
+            last_url = self.load_last_url()
+            self.setUrl(QUrl(last_url))
             self.loaded = True
 
     def enterEvent(self, event):

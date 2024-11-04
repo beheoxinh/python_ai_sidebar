@@ -1,3 +1,4 @@
+# File: sidebar.py
 import win32gui
 import win32con
 import win32api
@@ -18,6 +19,7 @@ class Sidebar(QMainWindow):
         self.is_resizing = False
         self.has_active_popup = False
         self.popup_windows = []
+        self.last_width = None  # Store the last manually resized width
         self.init_ui()
         self.setup_shortcut()
 
@@ -59,7 +61,7 @@ class Sidebar(QMainWindow):
         self.setCentralWidget(container)
 
         primary_screen = QApplication.primaryScreen()
-        if primary_screen:
+        if (primary_screen):
             self.setFixedWidth(int(primary_screen.geometry().width() * 0.5))
 
         self.mouse_timer = QTimer()
@@ -119,7 +121,7 @@ class Sidebar(QMainWindow):
             if is_near_edge and not self.is_visible:
                 self.active_screen = screen
                 if not self.is_resizing:
-                    self.setFixedWidth(int(screen.geometry().width() * 0.5))
+                    self.setFixedWidth(self.last_width or int(screen.geometry().width() * 0.5))
                 self.update_position()
                 self.show()
                 self.is_visible = True
@@ -153,17 +155,10 @@ class Sidebar(QMainWindow):
             print(f"Error in delayed hide: {e}")
 
     def mousePressEvent(self, event):
-        if event.button() in (Qt.MouseButton.LeftButton, Qt.MouseButton.RightButton):
-            if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
-                self.hide()
-                self.is_visible = False
-        super().mousePressEvent(event)
-
-    def contextMenuEvent(self, event):
         if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
             self.hide()
             self.is_visible = False
-        super().contextMenuEvent(event)
+        super().mousePressEvent(event)
 
     def toggle_sidebar(self):
         if self.is_visible:
@@ -180,7 +175,7 @@ class Sidebar(QMainWindow):
         if screen:
             self.active_screen = screen
             if not self.is_resizing:
-                self.setFixedWidth(int(screen.geometry().width() * 0.5))
+                self.setFixedWidth(self.last_width or int(screen.geometry().width() * 0.5))
             self.update_position()
             self.show()
             self.is_visible = True
@@ -201,6 +196,7 @@ class Sidebar(QMainWindow):
 
     def resizing_finished(self):
         self.is_resizing = False
+        self.last_width = self.width()  # Save the last manually resized width
 
     def get_screen_at_cursor(self):
         cursor_pos = QCursor.pos()
@@ -233,3 +229,9 @@ class Sidebar(QMainWindow):
     def moveEvent(self, event):
         if self.active_screen:
             self.update_position()
+
+    def mousePressEvent(self, event):
+        if self.content_widget.web_view.underMouse():
+            event.accept()
+        else:
+            super().mousePressEvent(event)

@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton
 
 class TitleBar(QFrame):
@@ -7,25 +8,26 @@ class TitleBar(QFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        self.setFixedHeight(30)
+        self.setFixedHeight(40)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 5, 0)
         layout.setSpacing(0)
 
-        title = QLabel("BeHeoXinh AI Sidebar")
+        title = QLabel("BeHeoXinh AI")
         title.setStyleSheet("""
             color: white; 
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
         """)
         layout.addWidget(title)
 
         layout.addStretch()
 
         close_button = QPushButton("×")
-        close_button.setFixedSize(30, 30)
+        close_button.setFixedSize(60, 40)
         close_button.clicked.connect(self.parent.hide_sidebar)
+        close_button.setCursor(Qt.CursorShape.PointingHandCursor)
         close_button.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
@@ -44,6 +46,6 @@ class TitleBar(QFrame):
 
         self.setStyleSheet("""
             TitleBar {
-                background-color: #282C34;
+                background-color: #272522;
             }
         """)
