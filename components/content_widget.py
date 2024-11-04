@@ -42,6 +42,7 @@ class ContentWidget(QWidget):
         self.nav_bar.mistralClicked.connect(lambda: self.set_and_save_url("https://chat.mistral.ai/"))
         self.nav_bar.copilotClicked.connect(lambda: self.set_and_save_url("https://copilot.microsoft.com/"))
         self.nav_bar.geminiClicked.connect(lambda: self.set_and_save_url("https://gemini.google.com/"))
+        self.nav_bar.huggingClicked.connect(lambda: self.set_and_save_url("https://huggingface.co/chat/"))
 
     def set_and_save_url(self, url):
         self.web_view.setUrl(QUrl(url))

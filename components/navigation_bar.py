@@ -10,6 +10,7 @@ class NavigationBar(QFrame):
     mistralClicked = pyqtSignal()
     copilotClicked = pyqtSignal()
     geminiClicked = pyqtSignal()
+    huggingClicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -40,11 +41,13 @@ class NavigationBar(QFrame):
         btn_chatgpt = self.create_button("images/chatgpt.svg", "Go to ChatGPT", self.chatgptClicked)
         btn_claude = self.create_button("images/claude.svg", "Go to Claude", self.claudeClicked)
         btn_mistral = self.create_button("images/mistral.svg", "Go to Mistral", self.mistralClicked)
+        btn_hugging = self.create_button("images/hugging.svg", "Go to Hugging", self.huggingClicked)
         btn_copilot = self.create_button("images/copilot.svg", "Go to Copilot", self.copilotClicked)
         btn_gemini = self.create_button("images/gemini.svg", "Go to Gemini", self.geminiClicked)
         center_layout.addWidget(btn_chatgpt, 0, Qt.AlignmentFlag.AlignHCenter)
         center_layout.addWidget(btn_claude, 0, Qt.AlignmentFlag.AlignHCenter)
         center_layout.addWidget(btn_mistral, 0, Qt.AlignmentFlag.AlignHCenter)
+        center_layout.addWidget(btn_hugging, 0, Qt.AlignmentFlag.AlignHCenter)
         center_layout.addWidget(btn_copilot, 0, Qt.AlignmentFlag.AlignHCenter)
         center_layout.addWidget(btn_gemini, 0, Qt.AlignmentFlag.AlignHCenter)
 
