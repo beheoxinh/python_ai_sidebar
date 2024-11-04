@@ -70,3 +70,6 @@ $RECYCLE.BIN/
 secure_cache
 __pycache__
 !/lasturl
+
+/dist
+/build
