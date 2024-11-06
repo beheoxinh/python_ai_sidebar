@@ -9,6 +9,7 @@ from PyQt6.QtWebEngineCore import (QWebEnginePage, QWebEngineProfile,
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QMainWindow
 
+from utils import AppPaths
 
 class SecureBrowserInterceptor(QWebEngineUrlRequestInterceptor):
     def interceptRequest(self, info):
@@ -446,7 +447,8 @@ class CustomWebView(QWebEngineView):
 
     def setup_profile(self):
         """Enhanced profile setup with additional browser features"""
-        cache_path = os.path.abspath("./secure_cache")
+        paths = AppPaths(app_name="SmartAI", app_author="Hsx2Coder")
+        cache_path = os.path.abspath(paths.get_appdata_dir("cache"))
         if not os.path.exists(cache_path):
             os.makedirs(cache_path)
 

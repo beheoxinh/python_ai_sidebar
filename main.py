@@ -1,66 +1,77 @@
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import win32gui
-import win32con
+import logging
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QMessageBox
+from utils import AppPaths
 from sidebar import Sidebar
 
-def bring_to_front(hwnd):
-    """Bring window to front and restore if minimized"""
-    if win32gui.IsIconic(hwnd):  # if minimized
-        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
-    win32gui.SetForegroundWindow(hwnd)
 
-def find_sidebar_window():
-    """Find existing sidebar window"""
-    def callback(hwnd, extra):
-        if win32gui.IsWindowVisible(hwnd):
-            title = win32gui.GetWindowText(hwnd)
-            if "sidebar" in title.lower():
-                extra.append(hwnd)
+def show_error(message):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Icon.Critical)
+    msg.setText("Error")
+    msg.setInformativeText(message)
+    msg.setWindowTitle("Application Error")
+    msg.exec()
 
-    windows = []
-    win32gui.EnumWindows(callback, windows)
-    return windows[0] if windows else None
 
 def main():
-    app = QApplication(sys.argv)
+    try:
+        app = QApplication(sys.argv)
 
-    # Check if this is a callback
-    if len(sys.argv) > 1 and sys.argv[1].startswith('sidebarcallback://'):
-        # Try to find existing sidebar window
-        existing_hwnd = find_sidebar_window()
-        if existing_hwnd:
-            # Bring existing window to front
-            bring_to_front(existing_hwnd)
-            # Find the sidebar instance
-            for widget in app.allWidgets():
-                if isinstance(widget, Sidebar):
-                    widget.content_widget.web_view.custom_page.handleAuthCallback(sys.argv[1])
-                    break
-        return
+        paths = AppPaths()
 
-    # Normal startup
-    sidebar = Sidebar()
+        # Log important paths
+        logging.info(f"Current working directory: {os.getcwd()}")
+        logging.info(f"Executable path: {sys.executable}")
+        logging.info(f"System PATH: {os.environ.get('PATH')}")
 
-    # Create system tray icon
-    tray_icon = QSystemTrayIcon(QIcon("images/tray.svg"), parent=app)
-    tray_menu = QMenu()
+        # Try to load icon
+        icon_path = paths.get_path('images', 'tray.svg')
+        logging.info(f"Trying to load icon from: {icon_path}")
 
-    show_action = QAction("Show")
-    show_action.triggered.connect(sidebar.show_sidebar)
-    tray_menu.addAction(show_action)
+        if not os.path.exists(icon_path):
+            logging.error(f"Icon file not found: {icon_path}")
+            raise FileNotFoundError(f"Icon file not found: {icon_path}")
 
-    exit_action = QAction("Exit App")
-    exit_action.triggered.connect(app.quit)
-    tray_menu.addAction(exit_action)
+        icon = QIcon(icon_path)
+        if icon.isNull():
+            logging.error("Failed to load icon")
+            raise Exception("Failed to load icon")
 
-    tray_icon.setContextMenu(tray_menu)
-    tray_icon.show()
+        tray_icon = QSystemTrayIcon(icon, parent=app)
+        tray_menu = QMenu()
 
-    sys.exit(app.exec())
+        try:
+            sidebar = Sidebar()
+        except Exception as e:
+            logging.exception("Failed to create sidebar")
+            raise Exception(f"Failed to create sidebar: {str(e)}")
+
+        show_action = QAction("Show")
+        show_action.triggered.connect(sidebar.show_sidebar)
+        tray_menu.addAction(show_action)
+
+        exit_action = QAction("Quit")
+        exit_action.triggered.connect(app.quit)
+        tray_menu.addAction(exit_action)
+
+        tray_icon.setContextMenu(tray_menu)
+        tray_icon.show()
+
+        return app.exec()
+
+    except Exception as e:
+        logging.exception("Fatal error in main")
+        show_error(str(e))
+        return 1
+
 
 if __name__ == '__main__':
-    main()
+    try:
+        sys.exit(main())
+    except Exception as e:
+        logging.exception("Fatal error")
+        print(f"Fatal error: {e}")
+        sys.exit(1)

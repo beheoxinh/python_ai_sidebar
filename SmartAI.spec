@@ -3,10 +3,10 @@
 
 a = Analysis(
     ['main.py'],
-    pathex=[],
+    pathex=['.'],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[('images', 'images'), ('icon.ico', '.')],
+    hiddenimports=['sidebar', 'components'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
