@@ -1,6 +1,5 @@
 # File: sidebar.py
 import win32gui
-import win32con
 import win32api
 from PyQt6.QtCore import Qt, QTimer, QPoint
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QApplication
@@ -62,7 +61,7 @@ class Sidebar(QMainWindow):
 
         primary_screen = QApplication.primaryScreen()
         if primary_screen:
-            self.setFixedWidth(int(primary_screen.geometry().width() * 0.6))
+            self.setFixedWidth(int(primary_screen.geometry().width() * 0.5))
 
         # Xác định màn hình ngoài cùng bên phải
         self.rightmost_screen = max(QApplication.screens(), key=lambda s: s.geometry().x() + s.geometry().width())
@@ -106,6 +105,22 @@ class Sidebar(QMainWindow):
         self.has_active_popup = False
         self.mouse_timer.start(50)  # Restart the mouse timer
 
+    def is_fullscreen_on_screen(self, screen):
+        """Kiểm tra xem màn hình có ứng dụng toàn màn hình hay không."""
+
+        def enum_windows_callback(hwnd, result):
+            if not win32gui.IsWindowVisible(hwnd):
+                return
+            rect = win32gui.GetWindowRect(hwnd)
+            screen_geometry = screen.geometry()
+            if rect[0] == screen_geometry.left() and rect[1] == screen_geometry.top() and \
+                    rect[2] == screen_geometry.right() and rect[3] == screen_geometry.bottom():
+                result.append(hwnd)
+
+        result = []
+        win32gui.EnumWindows(enum_windows_callback, result)
+        return len(result) > 0
+
     def check_mouse(self):
         try:
             if self.is_resizing or self.has_active_popup:
@@ -113,6 +128,11 @@ class Sidebar(QMainWindow):
 
             screen = self.get_screen_at_cursor()
             if not screen or screen != self.rightmost_screen:  # Chỉ kích hoạt trên màn hình ngoài cùng bên phải
+                return
+
+            # Kiểm tra xem màn hình tận cùng bên phải có ứng dụng toàn màn hình không
+            if self.is_fullscreen_on_screen(self.rightmost_screen):
+                print("Màn hình ngoài cùng bên phải đang có ứng dụng toàn màn hình. Không hiển thị Sidebar.")
                 return
 
             cursor_pos = win32gui.GetCursorPos()
@@ -156,12 +176,6 @@ class Sidebar(QMainWindow):
                 self.is_visible = False
         except Exception as e:
             print(f"Error in delayed hide: {e}")
-
-    def mousePressEvent(self, event):
-        if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
-            self.hide()
-            self.is_visible = False
-        super().mousePressEvent(event)
 
     def toggle_sidebar(self):
         if self.is_visible:
@@ -234,7 +248,10 @@ class Sidebar(QMainWindow):
             self.update_position()
 
     def mousePressEvent(self, event):
-        if self.content_widget.web_view.underMouse():
+        if not self.geometry().contains(event.globalPos()) and not self.has_active_popup:
+            self.hide()
+            self.is_visible = False
+        elif self.content_widget.web_view.underMouse():
             event.accept()
         else:
             super().mousePressEvent(event)
