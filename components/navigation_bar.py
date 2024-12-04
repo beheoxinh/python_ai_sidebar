@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QPushButton, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QPushButton, QSpacerItem, QSizePolicy, QMenu
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QIcon
 from utils import AppPaths
@@ -14,6 +14,7 @@ class NavigationBar(QFrame):
     copilotClicked = pyqtSignal()
     geminiClicked = pyqtSignal()
     huggingClicked = pyqtSignal()
+    clearCacheRequested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -84,4 +85,18 @@ class NavigationBar(QFrame):
                 background-color: #404040;
             }
         """)
+
+        # Add context menu for clearing cache
+        btn.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        btn.customContextMenuRequested.connect(lambda pos, b=btn: self.show_context_menu(pos, b))
+
         return btn
+
+    def show_context_menu(self, pos, button):
+        menu = QMenu(self)
+        clear_cache_action = menu.addAction("Clear Cache")
+        clear_cache_action.triggered.connect(lambda: self.clear_cache(button))
+        menu.exec(button.mapToGlobal(pos))
+
+    def clear_cache(self, button):
+        self.clearCacheRequested.emit()

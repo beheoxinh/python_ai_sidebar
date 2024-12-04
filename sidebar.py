@@ -61,8 +61,11 @@ class Sidebar(QMainWindow):
         self.setCentralWidget(container)
 
         primary_screen = QApplication.primaryScreen()
-        if (primary_screen):
-            self.setFixedWidth(int(primary_screen.geometry().width() * 0.5))
+        if primary_screen:
+            self.setFixedWidth(int(primary_screen.geometry().width() * 0.6))
+
+        # Xác định màn hình ngoài cùng bên phải
+        self.rightmost_screen = max(QApplication.screens(), key=lambda s: s.geometry().x() + s.geometry().width())
 
         self.mouse_timer = QTimer()
         self.mouse_timer.timeout.connect(self.check_mouse)
@@ -109,11 +112,11 @@ class Sidebar(QMainWindow):
                 return
 
             screen = self.get_screen_at_cursor()
-            if not screen:
+            if not screen or screen != self.rightmost_screen:  # Chỉ kích hoạt trên màn hình ngoài cùng bên phải
                 return
 
             cursor_pos = win32gui.GetCursorPos()
-            screen_geometry = screen.geometry()
+            screen_geometry = self.rightmost_screen.geometry()
 
             is_near_edge = (cursor_pos[0] >= screen_geometry.x() + screen_geometry.width() - 5 and
                             cursor_pos[0] <= screen_geometry.x() + screen_geometry.width())

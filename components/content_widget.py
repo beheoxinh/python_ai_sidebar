@@ -43,6 +43,7 @@ class ContentWidget(QWidget):
         self.nav_bar.copilotClicked.connect(lambda: self.set_and_save_url("https://copilot.microsoft.com/"))
         self.nav_bar.geminiClicked.connect(lambda: self.set_and_save_url("https://gemini.google.com/"))
         self.nav_bar.huggingClicked.connect(lambda: self.set_and_save_url("https://huggingface.co/chat/"))
+        self.nav_bar.clearCacheRequested.connect(self.web_view.clear_cache)
 
     def set_and_save_url(self, url):
         self.web_view.setUrl(QUrl(url))

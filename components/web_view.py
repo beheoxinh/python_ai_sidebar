@@ -1,13 +1,15 @@
 # File: web_view.py
 import os
+import shutil
+import sys
 from urllib.parse import urlparse
 
-from PyQt6.QtCore import QUrl, Qt, pyqtSignal
-from PyQt6.QtGui import QGuiApplication
+from PyQt6.QtCore import QUrl, Qt, pyqtSignal, QTimer
+from PyQt6.QtGui import QGuiApplication, QClipboard
 from PyQt6.QtWebEngineCore import (QWebEnginePage, QWebEngineProfile,
                                    QWebEngineSettings, QWebEngineUrlRequestInterceptor)
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QApplication
 
 from utils import AppPaths
 
@@ -89,25 +91,45 @@ class CustomWebEnginePage(QWebEnginePage):
         self.action(QWebEnginePage.WebAction.ViewSource).setVisible(False)
         self.action(QWebEnginePage.WebAction.SavePage).setVisible(False)
         self.action(QWebEnginePage.WebAction.SelectAll).setVisible(False)
-        self.action(QWebEnginePage.WebAction.PasteAndMatchStyle).setVisible(False)
         self.action(QWebEnginePage.WebAction.InspectElement).setVisible(False)
-        self.action(QWebEnginePage.WebAction.ExitFullScreen).setVisible(False)
         self.action(QWebEnginePage.WebAction.DownloadLinkToDisk).setVisible(False)
         self.action(QWebEnginePage.WebAction.DownloadImageToDisk).setVisible(False)
         self.action(QWebEnginePage.WebAction.DownloadMediaToDisk).setVisible(False)
         self.action(QWebEnginePage.WebAction.OpenLinkInNewWindow).setVisible(False)
         self.action(QWebEnginePage.WebAction.OpenLinkInNewBackgroundTab).setVisible(False)
+        # self.action(QWebEnginePage.WebAction.Paste).setVisible(True)  # Ensure Paste action is enabled
+
+    def javaScriptCanAccessClipboard(self):
+        return True
+
+    def paste(self):
+        # Lấy clipboard từ QGuiApplication
+        clipboard = QGuiApplication.clipboard()
+        mime_data = clipboard.mimeData(QClipboard.Mode.Clipboard)
+
+        # Ưu tiên sử dụng plain text
+        if mime_data.hasText():
+            text = mime_data.text()
+        elif mime_data.hasHtml():
+            # Nếu không có plain text, lấy HTML (nếu cần)
+            text = mime_data.html()
+        else:
+            print("Unsupported clipboard format.")
+            return
+
+        # Làm sạch và chuẩn hóa nội dung
+        clean_text = text.replace('\r\n', '\n').replace('"', '\\"')
+
+        # Dán nội dung qua JavaScript
+        self.runJavaScript(f'''
+                var selection = window.getSelection();
+                if (!selection.rangeCount) return false;
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(document.createTextNode("{clean_text}"));
+            ''')
 
     def setup_scripts(self):
-        # 1. First inject the message queue handler
-        init_script = """
-        window.__messageQueue = [];
-        window.__messageHandlers = new Set();
-        window.MessagePortSafe = {};
-        """
-        self.runJavaScript(init_script)
 
-        # 2. Inject universal message handling system
         universal_messaging = """
         (function() {
             // Universal Message Handler
@@ -377,6 +399,7 @@ class CustomWebView(QWebEngineView):
     popupCreated = pyqtSignal(object)
     popupClosed = pyqtSignal()
     authCompleted = pyqtSignal(str)
+    clearCacheRequested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -445,6 +468,25 @@ class CustomWebView(QWebEngineView):
         # Áp dụng style
         self.setStyleSheet(self.menu_style)
 
+    def clear_cache(self):
+        # Clear HTTP cache
+        self.logout_chatgpt()
+
+        self.page().profile().clearHttpCache()
+        print("HTTP cache cleared")
+
+        # Clear cookies
+        cookie_store = self.page().profile().cookieStore()
+        cookie_store.deleteAllCookies()
+        print("Cookies cleared")
+
+
+    def logout_chatgpt(self):
+        # Navigate to the ChatGPT logout URL
+        logout_url = "https://chat.openai.com/logout"
+        self.setUrl(QUrl(logout_url))
+        print("Navigated to ChatGPT logout URL")
+
     def setup_profile(self):
         """Enhanced profile setup with additional browser features"""
         paths = AppPaths(app_name="SmartAI", app_author="Hsx2Coder")
@@ -455,9 +497,8 @@ class CustomWebView(QWebEngineView):
         self.profile.setCachePath(cache_path)
         self.profile.setPersistentStoragePath(cache_path)
         self.profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.DiskHttpCache)
-        self.profile.setPersistentCookiesPolicy(
-            QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies
-        )
+        self.profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies)
+
 
         # Enhanced profile settings
         self.profile.setSpellCheckEnabled(True)
@@ -469,40 +510,27 @@ class CustomWebView(QWebEngineView):
         settings.setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
         settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)
-
-        # Add secure request interceptor
+        settings.setAttribute(QWebEngineSettings.WebAttribute.Accelerated2dCanvasEnabled, True)
         self.profile.setUrlRequestInterceptor(EnhancedBrowserInterceptor())
 
     def setup_settings(self):
-        """Enhanced settings setup with additional browser features"""
         settings = self.settings()
-
-        # Basic features
         settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.WebGLEnabled, True)
-
-        # Window features
         settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanOpenWindows, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.AllowWindowActivationFromJavaScript, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.FocusOnNavigationEnabled, True)
-
-        # Content features
         settings.setAttribute(QWebEngineSettings.WebAttribute.AllowRunningInsecureContent, False)
         settings.setAttribute(QWebEngineSettings.WebAttribute.ErrorPageEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.ScrollAnimatorEnabled, True)
-
-        # Media features
         settings.setAttribute(QWebEngineSettings.WebAttribute.AutoLoadImages, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.WebRTCPublicInterfacesOnly, True)
-
-        # Security settings
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, False)
         settings.setAttribute(QWebEngineSettings.WebAttribute.XSSAuditingEnabled, True)
-
-        # Storage settings
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, True)  # Ensure this is set to True
         settings.setDefaultTextEncoding('UTF-8')
 
     def setup_cookie_store(self):
@@ -542,8 +570,9 @@ class CustomWebView(QWebEngineView):
     def on_load_finished(self, ok):
         """Handle page load completion"""
         if ok:
-            self.inject_enhanced_scripts()
+            # self.inject_enhanced_scripts()
             self.hide_scrollbar()
+            print("JavaScript injected successfully.")
         else:
             print("Page load failed")
 
@@ -681,13 +710,12 @@ class CustomWebView(QWebEngineView):
         self.setFocus()
         super().enterEvent(event)
 
-
 class EnhancedBrowserInterceptor(QWebEngineUrlRequestInterceptor):
     def interceptRequest(self, info):
         """Enhanced request interceptor with full browser headers"""
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.88 Safari/537.36",
+            "Accept": "text/html",
             "Accept-Language": "en-US,en;q=0.9",
             "Accept-Encoding": "gzip, deflate, br",
             "DNT": "1",
