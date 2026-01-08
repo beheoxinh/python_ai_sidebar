@@ -21,7 +21,7 @@ class NavigationBar(QFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        self.setFixedWidth(70)
+        self.setFixedWidth(60)
         self.setStyleSheet("""
             NavigationBar {
                 background-color: #1E1E1E;
@@ -38,14 +38,11 @@ class NavigationBar(QFrame):
         center_layout = QVBoxLayout()
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Tạo các buttons với icons
+        # Thứ tự mới: Gemini -> ChatGPT -> Mistral
         buttons = [
+            ("gemini.svg", 0.7, "Gemini", self.geminiClicked),
             ("chatgpt.svg", 0.8, "ChatGPT", self.chatgptClicked),
-            ("claude.svg", 0.8, "Claude", self.claudeClicked),
-            ("mistral.svg", 0.6, "Mistral", self.mistralClicked),
-            ("hugging.svg", 0.7, "Hugging", self.huggingClicked),
-            ("copilot.svg", 0.7, "Copilot", self.copilotClicked),
-            ("gemini.svg", 0.7, "Gemini", self.geminiClicked)
+            ("mistral.svg", 0.6, "Mistral", self.mistralClicked)
         ]
 
         for icon_file, image_size, tooltip, signal in buttons:
@@ -66,9 +63,8 @@ class NavigationBar(QFrame):
         # Set icon cho button
         icon = QIcon(image_path)
         btn.setIcon(icon)
-        btn.setIconSize(btn.size() * image_size)  # Icon size 80% của button size
+        btn.setIconSize(btn.size() * image_size)
 
-        # Style không còn background-image nữa
         btn.setStyleSheet("""
             QPushButton {
                 background-color: #2D2D2D;

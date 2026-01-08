@@ -5,6 +5,7 @@ class TitleBar(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        self.drag_position = None
         self.setup_ui()
 
     def setup_ui(self):
@@ -15,11 +16,11 @@ class TitleBar(QFrame):
         layout.setSpacing(0)
 
         title = QLabel("BeHeoXinh AI")
-        title.setStyleSheet("""
+        title.setStyleSheet('''
             color: white; 
             font-weight: bold;
             font-size: 14px;
-        """)
+        ''')
         layout.addWidget(title)
 
         layout.addStretch()
@@ -28,7 +29,7 @@ class TitleBar(QFrame):
         close_button.setFixedSize(60, 40)
         close_button.clicked.connect(self.parent.hide_sidebar)
         close_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        close_button.setStyleSheet("""
+        close_button.setStyleSheet('''
             QPushButton {
                 background-color: transparent;
                 color: white;
@@ -41,11 +42,25 @@ class TitleBar(QFrame):
             QPushButton:hover {
                 background-color: #ff0000;
             }
-        """)
+        ''')
         layout.addWidget(close_button)
 
-        self.setStyleSheet("""
+        self.setStyleSheet('''
             TitleBar {
                 background-color: #272522;
             }
-        """)
+        ''')
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_position = event.globalPosition().toPoint() - self.parent.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton and self.drag_position:
+            self.parent.move(event.globalPosition().toPoint() - self.drag_position)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.drag_position = None
+        event.accept()

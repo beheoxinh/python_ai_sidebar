@@ -37,6 +37,7 @@ class AppPaths:
                 self.app_name
             )
         else:
+            # Linux/Unix standard: ~/.local/share/AppName
             base_path = os.path.expanduser(f'~/.local/share/{self.app_name}')
 
         if subfolder:

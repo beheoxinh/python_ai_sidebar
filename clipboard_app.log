@@ -1,0 +1,270 @@
+2024-12-05 01:01:06,073 - INFO - Current working directory: D:\WwW\python_ai_sidebar
+2024-12-05 01:01:06,073 - INFO - Executable path: D:\WwW\python_ai_sidebar\.venv\Scripts\python.exe
+2024-12-05 01:01:06,073 - INFO - System PATH: C:\Program Files\Python\Lib\site-packages\PyQt6\Qt6\bin;D:\WwW\python_ai_sidebar\.venv\Scripts;C:\ProgramData\Cygwin64\bin ;C:\Program Files\VMware\VMware Workstation\bin\;C:\Program Files\Python\Scripts\;C:\Program Files\Python\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Users\beheo\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Program Files\Java\jdk-20\bin;C:\Program Files\Java\Maven\bin;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\ProgramData\chocolatey\bin;C:\Program Files\CMake\bin;C:\Program Files\dotnet\;C:\Program Files\PuTTY\;C:\Program Files\TortoiseGit\bin;C:\Program Files (x86)\cloudflared\;C:\Unlistence Apps\AdbPlatformTools;C:\Users\beheo\AppData\Local\Microsoft\WindowsApps;C:\ProgramData\Kubernetes\Tools\HelmKube;C:\ProgramData\PHP;C:\Program Files\Git\cmd;C:\Program Files\PowerShell\7\;;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\ComposerSetup\bin;C:\Users\beheo\scripts;C:\Users\beheo\.dotnet\tools;C:\Users\beheo\AppData\Local\Programs\oh-my-posh\bin;C:\ProgramData\Cygwin64\bin
+2024-12-05 01:01:06,074 - INFO - Trying to load icon from: D:\WwW\python_ai_sidebar\images\tray.svg
+2024-12-05 01:01:17,560 - INFO - Clipboard changed. Current text: Điều chỉnh chính:
+Giới hạn số lần thử lại:
+
+max_retries đảm bảo chỉ thử đặt lại clipboard tối đa 3 lần.
+Log sẽ ghi nhận khi đạt đến giới hạn này.
+Tăng thời gian trễ:
+
+QTimer.singleShot(50) để đặt lại nội dung và singleShot(100) để xác minh nội dung với khoảng thời gian tăng dần.
+Dừng lặp vô hạn:
+
+Khi đạt giới hạn thử lại (max_retries), chương trình sẽ ghi log và dừng việc cố gắng đặt lại clipboard.
+2024-12-05 01:01:17,560 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:01:17,612 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:01:17,713 - INFO - Clipboard verification successful.
+2024-12-05 01:01:33,764 - INFO - Clipboard changed. Current text:    show_action = QAction("Show")
+        show_action.triggered.connect(sidebar.show_sidebar)
+        tray_menu.addAction(show_action)
+
+        exit_action = QAction("Quit")
+        exit_action.triggered.connect(app.quit)
+        tray_menu.addAction(exit_action)
+
+        tray_icon.setContextMenu(tray_menu)
+        tray_icon.show()
+
+        # Thiết lập Clipboard listener
+        clipboard = app.clipboard()
+        clipboard_handler = ClipboardHandler(clipboard)
+        clipboard.dataChanged.connect(clipboard_handler.on_clipboard_change)
+
+2024-12-05 01:01:33,912 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:01:33,962 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:01:34,063 - INFO - Clipboard verification successful.
+2024-12-05 01:01:43,029 - INFO - Clipboard changed. Current text: show_action = QAction("Show")
+        show_action.triggered.connect(sidebar.show_sidebar)
+        tray_menu.addAction(show_action)
+
+        exit_action = QAction("Quit")
+        exit_action.triggered.connect(app.quit)
+        tray_menu.addAction(exit_action)
+
+        tray_icon.setContextMenu(tray_menu)
+        tray_icon.show()
+2024-12-05 01:01:43,030 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:01:43,080 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:01:43,181 - INFO - Clipboard verification successful.
+2024-12-05 01:01:51,528 - INFO - Clipboard changed. Current text: icon_path = paths.get_path('images', 'tray.svg')
+        logging.info(f"Trying to load icon from: {icon_path}")
+
+        if not os.path.exists(icon_path):
+            logging.error(f"Icon file not found: {icon_path}")
+            raise FileNotFoundError(f"Icon file not found: {icon_path}")
+
+        icon = QIcon(icon_path)
+        if icon.isNull():
+            logging.error("Failed to load icon")
+            raise Exception("Failed to load icon")
+2024-12-05 01:01:51,530 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:01:51,582 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:01:51,683 - INFO - Clipboard verification successful.
+2024-12-05 01:02:06,632 - INFO - Clipboard changed. Current text:         # Load icon
+        icon_path = paths.get_path('images', 'tray.svg')
+        logging.info(f"Trying to load icon from: {icon_path}")
+
+        if not os.path.exists(icon_path):
+            logging.error(f"Icon file not found: {icon_path}")
+            raise FileNotFoundError(f"Icon file not found: {icon_path}")
+
+        icon = QIcon(icon_path)
+        if icon.isNull():
+            logging.error("Failed to load icon")
+            raise Exception("Failed to load icon")
+2024-12-05 01:02:06,633 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:02:06,684 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:02:06,784 - INFO - Clipboard verification successful.
+2024-12-05 01:02:14,178 - INFO - Clipboard changed. Current text: # Load icon
+        icon_path = paths.get_path('images', 'tray.svg')
+        logging.info(f"Trying to load icon from: {icon_path}")
+
+        if not os.path.exists(icon_path):
+            logging.error(f"Icon file not found: {icon_path}")
+            raise FileNotFoundError(f"Icon file not found: {icon_path}")
+
+        icon = QIcon(icon_path)
+        if icon.isNull():
+            logging.error("Failed to load icon")
+            raise Exception("Failed to load icon")
+
+        tray_icon = QSystemTrayIcon(icon, parent=app)
+        tray_menu = QMenu()
+2024-12-05 01:02:14,178 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:02:14,230 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:02:14,331 - INFO - Clipboard verification successful.
+2024-12-05 01:02:20,670 - INFO - Clipboard changed. Current text: def main():
+    try:
+        app = QApplication(sys.argv)
+
+        paths = AppPaths()
+
+        # Log các đường dẫn quan trọng
+        logging.info(f"Current working directory: {os.getcwd()}")
+        logging.info(f"Executable path: {sys.executable}")
+        logging.info(f"System PATH: {os.environ.get('PATH')}")
+
+2024-12-05 01:02:20,671 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:02:20,722 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:02:20,822 - INFO - Clipboard verification successful.
+2024-12-05 01:02:39,765 - INFO - Clipboard changed. Current text: import os
+import sys
+import logging
+from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QMessageBox
+from utils import AppPaths
+from sidebar import Sidebar
+
+# Cấu hình logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("clipboard_app.log", mode="w", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+
+def show_error(message):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Icon.Critical)
+    msg.setText("Error")
+    msg.setInformativeText(message)
+    msg.setWindowTitle("Application Error")
+    msg.exec()
+
+
+class ClipboardHandler:
+    def __init__(self, clipboard):
+        self.clipboard = clipboard
+        self.last_text = ""  # Lưu nội dung clipboard gần nhất
+        self.is_updating = False  # Ngăn chặn vòng lặp sự kiện
+        self.retry_count = 0  # Số lần thử lại khi xác minh clipboard thất bại
+        self.max_retries = 3  # Số lần thử tối đa
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+
+    def on_clipboard_change(self):
+        try:
+            if self.is_updating:
+                return
+
+            if self.clipboard.mimeData().hasText():
+                current_text = self.clipboard.text()
+
+                if not current_text.strip():
+                    logging.info("Clipboard content is empty; skipping.")
+                    return
+
+                if current_text == self.last_text:
+                    logging.info("Clipboard content is unchanged; skipping.")
+                    return
+
+                logging.info(f"Clipboard changed. Current text: {current_text}")
+
+                # Ghi đè nội dung clipboard
+                self.is_updating = True
+                self.retry_count = 0  # Reset số lần thử lại
+                self.clipboard.setText(current_text)
+                logging.info("Clipboard content overwritten with the same text.")
+
+                # Đảm bảo nội dung được đặt lại thành công
+                QTimer.singleShot(50, lambda: self.verify_clipboard(current_text))
+            else:
+                logging.info("Clipboard does not contain text; skipping.")
+
+        except Exception as e:
+            logging.exception("Error handling clipboard change")
+
+    def verify_clipboard(self, expected_text):
+        """Đảm bảo clipboard được ghi đúng nội dung."""
+        if self.clipboard.text() != expected_text:
+            self.retry_count += 1
+            logging.warning(f"Clipboard verification failed. Retrying ({self.retry_count}/{self.max_retries})...")
+
+            if self.retry_count <= self.max_retries:
+                QTimer.singleShot(50, lambda: self.clipboard.setText(expected_text))
+                QTimer.singleShot(100, lambda: self.verify_clipboard(expected_text))  # Tăng thời gian xác minh
+            else:
+                logging.error("Max retries reached. Unable to set clipboard content.")
+        else:
+            logging.info("Clipboard verification successful.")
+            self.last_text = expected_text  # Cập nhật last_text nếu thành công
+            self.is_updating = False  # Reset trạng thái sau khi hoàn tất
+
+    def reset_updating_flag(self):
+        self.is_updating = False  # Reset trạng thái
+
+
+def main():
+    try:
+        app = QApplication(sys.argv)
+
+        paths = AppPaths()
+
+        # Log các đường dẫn quan trọng
+        logging.info(f"Current working directory: {os.getcwd()}")
+        logging.info(f"Executable path: {sys.executable}")
+        logging.info(f"System PATH: {os.environ.get('PATH')}")
+
+        # Load icon
+        icon_path = paths.get_path('images', 'tray.svg')
+        logging.info(f"Trying to load icon from: {icon_path}")
+
+        if not os.path.exists(icon_path):
+            logging.error(f"Icon file not found: {icon_path}")
+            raise FileNotFoundError(f"Icon file not found: {icon_path}")
+
+        icon = QIcon(icon_path)
+        if icon.isNull():
+            logging.error("Failed to load icon")
+            raise Exception("Failed to load icon")
+
+        tray_icon = QSystemTrayIcon(icon, parent=app)
+        tray_menu = QMenu()
+
+        try:
+            sidebar = Sidebar()
+        except Exception as e:
+            logging.exception("Failed to create sidebar")
+            raise Exception(f"Failed to create sidebar: {str(e)}")
+
+        show_action = QAction("Show")
+        show_action.triggered.connect(sidebar.show_sidebar)
+        tray_menu.addAction(show_action)
+
+        exit_action = QAction("Quit")
+        exit_action.triggered.connect(app.quit)
+        tray_menu.addAction(exit_action)
+
+        tray_icon.setContextMenu(tray_menu)
+        tray_icon.show()
+
+        # Thiết lập Clipboard listener
+        clipboard = app.clipboard()
+        clipboard_handler = ClipboardHandler(clipboard)
+        clipboard.dataChanged.connect(clipboard_handler.on_clipboard_change)
+
+        return app.exec()
+
+    except Exception as e:
+        logging.exception("Fatal error in main")
+        show_error(str(e))
+        return 1
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except Exception as e:
+        logging.exception("Fatal error")
+        print(f"Fatal error: {e}")
+        sys.exit(1)
+
+2024-12-05 01:02:39,768 - INFO - Clipboard content overwritten with the same text.
+2024-12-05 01:02:39,820 - WARNING - Clipboard verification failed. Retrying (1/3)...
+2024-12-05 01:02:39,921 - INFO - Clipboard verification successful.

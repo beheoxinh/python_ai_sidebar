@@ -536,18 +536,18 @@ class CustomWebView(QWebEngineView):
     def setup_cookie_store(self):
         cookie_store = self.profile.cookieStore()
 
-        def on_cookie_added(cookie):
-            cookie_name = cookie.name().data().decode()
-            domain = cookie.domain()
-            print(f"Cookie added: {cookie_name} for domain: {domain}")
-
-        def on_cookie_removed(cookie):
-            cookie_name = cookie.name().data().decode()
-            print(f"Cookie removed: {cookie_name}")
-
-        # Connect signals
-        cookie_store.cookieAdded.connect(on_cookie_added)
-        cookie_store.cookieRemoved.connect(on_cookie_removed)
+        # def on_cookie_added(cookie):
+        #     cookie_name = cookie.name().data().decode()
+        #     domain = cookie.domain()
+        #     print(f"Cookie added: {cookie_name} for domain: {domain}")
+        #
+        # def on_cookie_removed(cookie):
+        #     cookie_name = cookie.name().data().decode()
+        #     print(f"Cookie removed: {cookie_name}")
+        #
+        # # Connect signals
+        # cookie_store.cookieAdded.connect(on_cookie_added)
+        # cookie_store.cookieRemoved.connect(on_cookie_removed)
 
         # Ensure cookies are not added/removed repeatedly
         self.cookie_set = set()
@@ -556,13 +556,13 @@ class CustomWebView(QWebEngineView):
             cookie_name = cookie.name().data().decode()
             if cookie_name not in self.cookie_set:
                 self.cookie_set.add(cookie_name)
-                on_cookie_added(cookie)
+                # on_cookie_added(cookie)
 
         def handle_cookie_removed(cookie):
             cookie_name = cookie.name().data().decode()
             if cookie_name in self.cookie_set:
                 self.cookie_set.remove(cookie_name)
-                on_cookie_removed(cookie)
+                # on_cookie_removed(cookie)
 
         cookie_store.cookieAdded.connect(handle_cookie_added)
         cookie_store.cookieRemoved.connect(handle_cookie_removed)
